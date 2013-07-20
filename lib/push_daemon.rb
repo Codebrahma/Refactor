@@ -16,17 +16,11 @@ class PushDaemon
 
   private
 
+  # determine the type and find the class for that type 
+  # and pass it to worker which call run
   def process_request(data)
-    case data[0].split.first
-    when "PING"
-      @server.send("PONG", data[1][3], data[1][1])
-    when "SEND"
-      data[0][5..-1].match(/([a-zA-Z0-9_\-]*) "([^"]*)/)
-      json = JSON.generate({
-        "registration_ids" => [$1],
-        "data" => { "alert" => $2 }
-      })
-      @worker << (json)
-    end
+    klass = Jobs.const_get(data.type.capitalize) rescue Jobs::Dummy
+    job = klass.new(@server, data)
+    @worker << job 
   end
 end

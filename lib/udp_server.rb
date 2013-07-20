@@ -18,7 +18,9 @@ class UDPServer
   private
 
   def receive
-    @socket.recvfrom(4096)
+    if resp = @socket.recvfrom(4096)
+      UDPResponse.new(resp)
+    end
   end
 
 end
